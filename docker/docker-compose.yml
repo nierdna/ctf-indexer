@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # MongoDB Database
+  # ========================================
+  mongo:
+    image: mongo:6
+    container_name: indexer-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: my_indexer_db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================================
+  # RabbitMQ Message Queue (Optional)
+  # ========================================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: indexer-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================================
+  # Indexer Service
+  # ========================================
+  indexer:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: my-indexer
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      # RPC Configuration
+      RPC_URL: ${RPC_URL}
+      
+      # Database
+      MONGODB_URI: mongodb://mongo:27017
+      
+      # Message Queue
+      RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672
+      
+      # API
+      PORT: 3000
+      
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      
+      # Node.js
+      NODE_ENV: production
+    volumes:
+      # Mount config for easy updates without rebuild
+      - ../config:/app/config:ro
+      - ../abi:/app/abi:ro
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+volumes:
+  mongo_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+
+# ========================================
+# Networks (optional)
+# ========================================
+networks:
+  default:
+    name: indexer-network
+

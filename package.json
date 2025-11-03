@@ -1,0 +1,36 @@
+{
+  "name": "indexer-template",
+  "version": "1.0.0",
+  "description": "Blockchain event indexer powered by @lynx-core/indexer",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "docker:build": "docker build -t my-indexer -f docker/Dockerfile .",
+    "docker:up": "docker-compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker-compose -f docker/docker-compose.yml down",
+    "docker:logs": "docker-compose -f docker/docker-compose.yml logs -f indexer",
+    "test": "echo \"Add your tests here\" && exit 0"
+  },
+  "keywords": [
+    "blockchain",
+    "indexer",
+    "ethereum",
+    "events"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@lynx-core/indexer": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

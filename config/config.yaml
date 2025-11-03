@@ -1,0 +1,185 @@
+# ========================================
+# 🔧 INDEXER CONFIGURATION
+# ========================================
+# This is a TEMPLATE file. Please customize for your contract.
+# See CUSTOMIZATION_GUIDE.md for detailed instructions.
+
+# ========================================
+# SERVICE INFORMATION
+# ========================================
+serviceName: my-indexer
+# Description: Unique name for your indexer service
+# Example: exchange-indexer, nft-indexer, defi-indexer
+
+contractName: YourContract
+# Description: Name of the smart contract you're indexing
+# Example: CTFExchange, UniswapV2Router, BoredApeYachtClub
+
+contractAddress: "0x0000000000000000000000000000000000000000"
+# Description: Deployed contract address (checksummed)
+# ⚠️ REQUIRED: Replace with your actual contract address
+# Example: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E"
+
+# ========================================
+# BLOCKCHAIN NETWORK
+# ========================================
+chainId: 1
+# Description: EVM chain ID
+# Examples:
+#   1       = Ethereum Mainnet
+#   5       = Goerli Testnet
+#   137     = Polygon Mainnet
+#   80001   = Polygon Mumbai
+#   56      = BSC Mainnet
+#   97      = BSC Testnet
+#   42161   = Arbitrum One
+#   10      = Optimism
+#   8453    = Base Mainnet
+#   84532   = Base Sepolia
+
+network: mainnet
+# Description: Network name (human-readable)
+# Examples: mainnet, goerli, polygon, bsc, arbitrum, optimism, base-sepolia
+
+startBlock: 0
+# Description: Block number to start indexing from
+# ⚠️ REQUIRED: Set to your contract deployment block
+# Tip: Find on Etherscan (Contract > Contract Creation)
+# Example: 18000000
+
+# ========================================
+# RPC CONFIGURATION
+# ========================================
+rpcUrl: ${RPC_URL}
+# Description: WebSocket RPC endpoint (required for real-time events)
+# ⚠️ REQUIRED: Set RPC_URL in .env file
+# Examples:
+#   - wss://mainnet.infura.io/ws/v3/YOUR_KEY
+#   - wss://eth-mainnet.g.alchemy.com/v2/YOUR_KEY
+#   - wss://base-sepolia.g.alchemy.com/v2/YOUR_KEY
+
+fallbackRpcUrls: []
+# Description: Fallback RPC URLs (optional, for high availability)
+# Example:
+#   - wss://mainnet.infura.io/ws/v3/BACKUP_KEY
+#   - wss://eth-mainnet.g.alchemy.com/v2/BACKUP_KEY
+
+# ========================================
+# EVENTS TO INDEX
+# ========================================
+events:
+  - Transfer
+  - Approval
+# Description: List of event names from your contract ABI
+# ⚠️ REQUIRED: Replace with actual events from your contract
+# Examples:
+#   DeFi: Swap, Mint, Burn, Deposit, Withdraw
+#   NFT: Transfer, Approval, ApprovalForAll
+#   Governance: ProposalCreated, VoteCast, ProposalExecuted
+#   CTF: OrderFilled, OrdersMatched, TokenRegistered
+
+# ========================================
+# DATABASE CONFIGURATION (MongoDB)
+# ========================================
+database:
+  uri: ${MONGODB_URI:-mongodb://mongo:27017}
+  # Description: MongoDB connection string
+  # Default: mongodb://mongo:27017 (for Docker)
+  # Production: mongodb://username:password@host:27017
+  
+  dbName: my_indexer_db
+  # Description: Database name (will be created if not exists)
+  # ⚠️ RECOMMENDED: Change to match your service name
+  # Example: exchange_indexer, nft_indexer
+  
+  collections:
+    events: events
+    # Description: Collection name for events
+    syncStatus: sync_status
+    # Description: Collection name for sync status
+    priorityQueue: priority_transactions
+    # Description: Collection name for priority transactions
+
+# ========================================
+# MESSAGE QUEUE / PUBLISHER (Optional)
+# ========================================
+publisher:
+  type: rabbitmq
+  # Description: Publisher type
+  # Options: 'rabbitmq', 'webhook', 'none'
+  # - rabbitmq: Publish to RabbitMQ exchange (for distributed systems)
+  # - webhook: HTTP POST to external endpoint
+  # - none: Skip publishing (database only)
+  
+  url: ${RABBITMQ_URL:-amqp://rabbitmq:5672}
+  # Description: RabbitMQ connection URL (if type = rabbitmq)
+  # Default: amqp://rabbitmq:5672 (for Docker)
+  
+  exchange: blockchain-events
+  # Description: RabbitMQ exchange name
+  
+  retries: 3
+  # Description: Number of retry attempts for failed publishes
+  
+  timeout: 5000
+  # Description: Timeout in milliseconds for publish operations
+
+# Alternative: Webhook publisher
+# publisher:
+#   type: webhook
+#   url: https://your-api.com/events
+#   retries: 3
+#   timeout: 5000
+
+# Alternative: No publisher (database only)
+# publisher:
+#   type: none
+
+# ========================================
+# FEATURE FLAGS
+# ========================================
+priorityLane: true
+# Description: Enable priority lane for fast-track transactions
+# - true: Enable POST /transactions/priority endpoint
+# - false: Disable priority lane (use only real-time subscription)
+# Use case: Critical transactions that need sub-second indexing
+
+crawler: true
+# Description: Enable background crawler for gap detection
+# - true: Auto-detect and backfill missing events
+# - false: Rely only on real-time subscription
+# Recommended: true (for production reliability)
+
+crawlerInterval: 60000
+# Description: Crawler interval in milliseconds
+# Examples:
+#   30000  = 30 seconds (fast chains: Polygon, BSC)
+#   60000  = 1 minute (Ethereum, Base)
+#   120000 = 2 minutes (low-activity contracts)
+
+# ========================================
+# PERFORMANCE TUNING
+# ========================================
+polling:
+  interval: 500
+  # Description: Priority lane polling interval (ms)
+  # Lower = faster indexing, higher RPC usage
+  # Range: 200-1000ms
+  
+  batchSize: 5000
+  # Description: Max blocks to query in single request
+  # Adjust based on RPC provider limits
+  # Range: 1000-10000
+
+# ========================================
+# MONITORING & METRICS
+# ========================================
+metrics:
+  enabled: true
+  # Description: Enable metrics endpoint
+  # Exposes: GET /metrics
+  
+  port: 9090
+  # Description: Metrics server port (if different from API)
+  # Usually same as API port (3000)
+
