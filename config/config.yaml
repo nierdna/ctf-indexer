@@ -7,15 +7,15 @@
 # ========================================
 # SERVICE INFORMATION
 # ========================================
-serviceName: my-indexer
+serviceName: ctf-indexer
 # Description: Unique name for your indexer service
 # Example: exchange-indexer, nft-indexer, defi-indexer
 
-contractName: YourContract
+contractName: ConditionalTokens
 # Description: Name of the smart contract you're indexing
 # Example: CTFExchange, UniswapV2Router, BoredApeYachtClub
 
-contractAddress: "0x0000000000000000000000000000000000000000"
+contractAddress: "0x4D97DCd97eC945f40cF65F87097ACe5EA0476045"
 # Description: Deployed contract address (checksummed)
 # ⚠️ REQUIRED: Replace with your actual contract address
 # Example: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E"
@@ -23,7 +23,7 @@ contractAddress: "0x0000000000000000000000000000000000000000"
 # ========================================
 # BLOCKCHAIN NETWORK
 # ========================================
-chainId: 1
+chainId: 137
 # Description: EVM chain ID
 # Examples:
 #   1       = Ethereum Mainnet
@@ -37,11 +37,11 @@ chainId: 1
 #   8453    = Base Mainnet
 #   84532   = Base Sepolia
 
-network: mainnet
+network: polygon
 # Description: Network name (human-readable)
 # Examples: mainnet, goerli, polygon, bsc, arbitrum, optimism, base-sepolia
 
-startBlock: 0
+startBlock: 33605403
 # Description: Block number to start indexing from
 # ⚠️ REQUIRED: Set to your contract deployment block
 # Tip: Find on Etherscan (Contract > Contract Creation)
@@ -68,8 +68,11 @@ fallbackRpcUrls: []
 # EVENTS TO INDEX
 # ========================================
 events:
-  - Transfer
-  - Approval
+  - ConditionPreparation
+  - ConditionResolution
+  - PositionSplit
+  - PositionsMerge
+  - PayoutRedemption
 # Description: List of event names from your contract ABI
 # ⚠️ REQUIRED: Replace with actual events from your contract
 # Examples:
@@ -87,7 +90,7 @@ database:
   # Default: mongodb://mongo:27017 (for Docker)
   # Production: mongodb://username:password@host:27017
   
-  dbName: my_indexer_db
+  dbName: ctf_indexer
   # Description: Database name (will be created if not exists)
   # ⚠️ RECOMMENDED: Change to match your service name
   # Example: exchange_indexer, nft_indexer
@@ -104,7 +107,7 @@ database:
 # MESSAGE QUEUE / PUBLISHER (Optional)
 # ========================================
 publisher:
-  type: rabbitmq
+  type: none
   # Description: Publisher type
   # Options: 'rabbitmq', 'webhook', 'none'
   # - rabbitmq: Publish to RabbitMQ exchange (for distributed systems)
