@@ -169,7 +169,7 @@ polling:
   # Lower = faster indexing, higher RPC usage
   # Range: 200-1000ms
   
-  batchSize: 5000
+  batchSize: ${BATCH_SIZE:-1000}
   # Description: Max blocks to query in single request
   # Adjust based on RPC provider limits
   # Range: 1000-10000
